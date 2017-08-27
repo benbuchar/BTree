@@ -22,15 +22,7 @@ public class BTree implements Serializable{
     int maxDegree;
 
     File fileOnDisk = new File("values.data");
-    /*
-        Notes on the RAF:
-        long at position 0: indicates the location of the seeker
-            seeker indicates next location in the RAF
-            where a node can be written
-        Nodes
-            x bytes long
-            position in file indicated by Node.spotInFile field
-     */
+   
     RandomAccessFile RAF;
 
     File serializedNodes = new File("nodes.bstrc");
@@ -51,23 +43,7 @@ public class BTree implements Serializable{
         largestKey = 0;
         smallestKey = 0;
 
-//        if(serializedNodes.exists()){
-//            try {
-////                RAF = new RandomAccessFile(fileOnDisk, "rw");
-////                RAF.seek(0);
-////                pointer = RAF.readLong();
-//            } catch (Exception e){
-//                e.printStackTrace();
-//            }
-//
-//            root = DISK_READ(0);
-//
-//        } else {
-
             try {
-//                RAF = new RandomAccessFile(fileOnDisk, "rw");
-//                RAF.seek(0);
-//                RAF.writeLong(0);
                 Node x = ALLOCATE_NODE();
                 x.leaf = true;
                 x.count = 0;
@@ -76,13 +52,11 @@ public class BTree implements Serializable{
             } catch (Exception e){
                 e.printStackTrace();
             }
-        //}
 
     }
 
 
     void splitChild(Node x, int i){
-       // System.out.println("CALLING SPLIT");
         Node z = ALLOCATE_NODE();
         Node y = x.children[i];
         z.leaf = y.leaf;
@@ -127,7 +101,6 @@ public class BTree implements Serializable{
             allKeyNames.add(data.cityName);
             allKeys.add(k);
 
-           // System.out.println("Adding " + data + " to tree with key " + k);
 
             if (k < smallestKey) {
                 smallestKey = k;
@@ -147,23 +120,16 @@ public class BTree implements Serializable{
                 s = insert_nonfull(s, data);
 
             } else {
-                //System.out.println("ROOT'S COUNT " + root.count);
                 r = insert_nonfull(r, data);
             }
         }
     }
 
     private Node insert_nonfull(Node x, WeatherData data) {
-       // System.out.println("CALLING INSERT NONFULL");
         int k = data.k;
         int i = x.count;
-        if(i == 7){
-            //attach to this line
-            //System.out.println("MEOW!!");
-        }
+       
         if(x.leaf){
-            //System.out.println("I: " + i);
-            //System.out.println(x.keys[i]);
             while(i >= 1 && k < x.keys[i]){
                 x.keys[i+1] = x.keys[i];
                 i = i - 1;
@@ -176,10 +142,8 @@ public class BTree implements Serializable{
         } else {
             while(i >= 1 && k < x.keys[i]){
                 i--;
-                //System.out.println(x.keys[i]);
             }
             i++;
-            //System.out.println("GETTING CHILD AT " + i);
             Node child = DISK_READ(x.children[i].spotInFile);
             if(child.count == maxDegree){
                 splitChild(x,i);
@@ -196,7 +160,6 @@ public class BTree implements Serializable{
 
 
     public Pair<Node,Integer> search(Node x, int key){
-       // System.out.println("CALLING SEARCH");
         int i = 1;
         while(i <= x.count && key > x.keys[i]){
             i++;
@@ -222,7 +185,6 @@ public class BTree implements Serializable{
     }
 
     private Node DISK_READ(long position) {
-       // System.out.println("CALLING DISK READ");
         if(serializedNodes.exists()){
             ObjectInputStream ois;
             try{
@@ -250,8 +212,6 @@ public class BTree implements Serializable{
     }
 
     private void DISK_WRITE(Node x) {
-       // System.out.println(x.spotInFile);
-       // System.out.println("CALLING DISK WRITE");
         if(serializedNodes.exists()){
             HashMap<Long, Node> lines = new HashMap<Long,Node>();
             ObjectInputStream ois = null;
@@ -286,7 +246,6 @@ public class BTree implements Serializable{
                 long lastKey = 0;
                 for(Long key : lines.keySet()){
                     oos.writeLong(key);
-                   // if(lines.get(key) == x)
                     oos.writeObject(lines.get(key));
                     lastKey = key;
                 }
